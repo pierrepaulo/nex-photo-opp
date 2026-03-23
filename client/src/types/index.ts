@@ -1,0 +1,53 @@
+export const Role = {
+  ADMIN: 'ADMIN',
+  PROMOTER: 'PROMOTER',
+} as const;
+
+export type Role = (typeof Role)[keyof typeof Role];
+
+export interface User {
+  id: string;
+  email: string;
+  role: Role;
+  createdAt?: string;
+}
+
+export interface LoginResponse {
+  token: string;
+  user: User;
+}
+
+export interface Photo {
+  id: string;
+  originalUrl: string;
+  framedUrl: string;
+  downloadToken: string;
+  promoterId: string;
+  createdAt: string;
+}
+
+export interface Log {
+  id: string;
+  userId: string | null;
+  ipAddress: string;
+  method: string;
+  route: string;
+  requestBody: string | null;
+  responseStatus: number;
+  actionType: string;
+  createdAt: string;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface ApiError {
+  error: string;
+  message: string;
+  statusCode: number;
+}
