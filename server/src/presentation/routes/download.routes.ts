@@ -1,9 +1,9 @@
 import { Router } from 'express';
 
-import { DownloadController } from '@/presentation/controllers/DownloadController';
+import { container } from '@/container';
 
 const router = Router();
-const controller = new DownloadController();
+const controller = container.controllers.downloadController;
 
 router.get('/:token', controller.getByToken.bind(controller));
 
