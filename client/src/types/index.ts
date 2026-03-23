@@ -35,6 +35,11 @@ export interface UploadPhotoResponse {
   createdAt: string;
 }
 
+/** Resposta pública de GET /api/download/:token. */
+export interface DownloadPhotoResponse {
+  framedUrl: string;
+}
+
 export interface Log {
   id: string;
   userId: string | null;
