@@ -30,7 +30,9 @@ export class LocalDiskStorageService implements IStorageService {
   }
 
   getPublicUrl(filePath: string): string {
-    const baseUrl = `http://localhost:${env.PORT}`;
+    const trimmed = env.SERVER_PUBLIC_URL.trim();
+    const baseUrl =
+      trimmed.length > 0 ? trimmed.replace(/\/$/, '') : `http://localhost:${env.PORT}`;
     return `${baseUrl}/uploads/${filePath}`;
   }
 }

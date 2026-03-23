@@ -5,7 +5,7 @@ import express from 'express';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 
-import { env } from '@/infrastructure/config/env';
+import { corsAllowedOrigins, env } from '@/infrastructure/config/env';
 import { errorHandler } from '@/presentation/middleware/errorHandler';
 import { logMiddleware } from '@/presentation/middleware/logMiddleware';
 import { apiRoutes } from '@/presentation/routes';
@@ -14,7 +14,17 @@ const app = express();
 
 app.use(
   cors({
-    origin: env.CLIENT_URL,
+    origin: (origin, callback) => {
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+      if (corsAllowedOrigins.includes(origin)) {
+        callback(null, origin);
+        return;
+      }
+      callback(null, false);
+    },
     credentials: true,
   }),
 );
