@@ -26,6 +26,15 @@ export interface Photo {
   createdAt: string;
 }
 
+/** Resposta de POST /api/photos (alinhado à Fase 4.10 / PhotoResponseDTO). */
+export interface UploadPhotoResponse {
+  id: string;
+  framedUrl: string;
+  downloadToken: string;
+  downloadUrl: string;
+  createdAt: string;
+}
+
 export interface Log {
   id: string;
   userId: string | null;
