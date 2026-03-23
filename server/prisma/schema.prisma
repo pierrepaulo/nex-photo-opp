@@ -50,6 +50,7 @@ model Log {
   requestBody    String?
   responseStatus Int
   actionType     String
+  userAgent      String?
   createdAt      DateTime @default(now())
 
   @@index([createdAt])
