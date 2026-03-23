@@ -5,6 +5,8 @@ import { IStorageService } from '@/application/services/IStorageService';
 import { GetCurrentUserUseCase } from '@/application/usecases/auth/GetCurrentUserUseCase';
 import { LoginUseCase } from '@/application/usecases/auth/LoginUseCase';
 import { GetPhotoStatsUseCase } from '@/application/usecases/admin/GetPhotoStatsUseCase';
+import { ExportLogsUseCase } from '@/application/usecases/log/ExportLogsUseCase';
+import { ListLogsUseCase } from '@/application/usecases/log/ListLogsUseCase';
 import { GetPhotoByTokenUseCase } from '@/application/usecases/photo/GetPhotoByTokenUseCase';
 import { ListPhotosUseCase } from '@/application/usecases/photo/ListPhotosUseCase';
 import { UploadAndFramePhotoUseCase } from '@/application/usecases/photo/UploadAndFramePhotoUseCase';
@@ -51,7 +53,12 @@ if (!fs.existsSync(frameOverlayPath)) {
 const frameOverlayBuffer = fs.readFileSync(frameOverlayPath);
 
 const useCases = {
-  loginUseCase: new LoginUseCase(repositories.userRepository, services.hashService, services.tokenService),
+  loginUseCase: new LoginUseCase(
+    repositories.userRepository,
+    services.hashService,
+    services.tokenService,
+    repositories.logRepository,
+  ),
   getCurrentUserUseCase: new GetCurrentUserUseCase(repositories.userRepository),
   uploadAndFramePhotoUseCase: new UploadAndFramePhotoUseCase(
     services.storageService,
@@ -63,13 +70,20 @@ const useCases = {
   getPhotoByTokenUseCase: new GetPhotoByTokenUseCase(repositories.photoRepository),
   listPhotosUseCase: new ListPhotosUseCase(repositories.photoRepository),
   getPhotoStatsUseCase: new GetPhotoStatsUseCase(repositories.photoRepository),
+  listLogsUseCase: new ListLogsUseCase(repositories.logRepository),
+  exportLogsUseCase: new ExportLogsUseCase(repositories.logRepository),
 };
 
 const controllers = {
   authController: new AuthController(useCases.loginUseCase, useCases.getCurrentUserUseCase),
   photoController: new PhotoController(useCases.uploadAndFramePhotoUseCase),
   downloadController: new DownloadController(useCases.getPhotoByTokenUseCase),
-  adminController: new AdminController(useCases.listPhotosUseCase, useCases.getPhotoStatsUseCase),
+  adminController: new AdminController(
+    useCases.listPhotosUseCase,
+    useCases.getPhotoStatsUseCase,
+    useCases.listLogsUseCase,
+    useCases.exportLogsUseCase,
+  ),
 };
 
 export const container = {
