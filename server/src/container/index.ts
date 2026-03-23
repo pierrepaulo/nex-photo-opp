@@ -4,7 +4,9 @@ import path from 'path';
 import { IStorageService } from '@/application/services/IStorageService';
 import { GetCurrentUserUseCase } from '@/application/usecases/auth/GetCurrentUserUseCase';
 import { LoginUseCase } from '@/application/usecases/auth/LoginUseCase';
+import { GetPhotoStatsUseCase } from '@/application/usecases/admin/GetPhotoStatsUseCase';
 import { GetPhotoByTokenUseCase } from '@/application/usecases/photo/GetPhotoByTokenUseCase';
+import { ListPhotosUseCase } from '@/application/usecases/photo/ListPhotosUseCase';
 import { UploadAndFramePhotoUseCase } from '@/application/usecases/photo/UploadAndFramePhotoUseCase';
 import { env } from '@/infrastructure/config/env';
 import { PrismaLogRepository } from '@/infrastructure/repositories/PrismaLogRepository';
@@ -15,6 +17,7 @@ import { FirebaseStorageService } from '@/infrastructure/services/FirebaseStorag
 import { JwtTokenService } from '@/infrastructure/services/JwtTokenService';
 import { LocalDiskStorageService } from '@/infrastructure/services/LocalDiskStorageService';
 import { SharpImageService } from '@/infrastructure/services/SharpImageService';
+import { AdminController } from '@/presentation/controllers/AdminController';
 import { AuthController } from '@/presentation/controllers/AuthController';
 import { DownloadController } from '@/presentation/controllers/DownloadController';
 import { PhotoController } from '@/presentation/controllers/PhotoController';
@@ -58,12 +61,15 @@ const useCases = {
     env.CLIENT_URL,
   ),
   getPhotoByTokenUseCase: new GetPhotoByTokenUseCase(repositories.photoRepository),
+  listPhotosUseCase: new ListPhotosUseCase(repositories.photoRepository),
+  getPhotoStatsUseCase: new GetPhotoStatsUseCase(repositories.photoRepository),
 };
 
 const controllers = {
   authController: new AuthController(useCases.loginUseCase, useCases.getCurrentUserUseCase),
   photoController: new PhotoController(useCases.uploadAndFramePhotoUseCase),
   downloadController: new DownloadController(useCases.getPhotoByTokenUseCase),
+  adminController: new AdminController(useCases.listPhotosUseCase, useCases.getPhotoStatsUseCase),
 };
 
 export const container = {
