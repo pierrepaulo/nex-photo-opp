@@ -1,6 +1,10 @@
+import fs from 'fs';
+import path from 'path';
+
 import { IStorageService } from '@/application/services/IStorageService';
 import { GetCurrentUserUseCase } from '@/application/usecases/auth/GetCurrentUserUseCase';
 import { LoginUseCase } from '@/application/usecases/auth/LoginUseCase';
+import { UploadAndFramePhotoUseCase } from '@/application/usecases/photo/UploadAndFramePhotoUseCase';
 import { env } from '@/infrastructure/config/env';
 import { PrismaLogRepository } from '@/infrastructure/repositories/PrismaLogRepository';
 import { PrismaPhotoRepository } from '@/infrastructure/repositories/PrismaPhotoRepository';
@@ -11,6 +15,7 @@ import { JwtTokenService } from '@/infrastructure/services/JwtTokenService';
 import { LocalDiskStorageService } from '@/infrastructure/services/LocalDiskStorageService';
 import { SharpImageService } from '@/infrastructure/services/SharpImageService';
 import { AuthController } from '@/presentation/controllers/AuthController';
+import { PhotoController } from '@/presentation/controllers/PhotoController';
 
 function createStorageService(): IStorageService {
   if (env.STORAGE_PROVIDER === 'firebase') {
@@ -32,13 +37,29 @@ const services = {
   imageProcessingService: new SharpImageService(),
 };
 
+const frameOverlayPath = path.resolve(process.cwd(), 'src/assets/frame-overlay.png');
+if (!fs.existsSync(frameOverlayPath)) {
+  throw new Error(
+    `Frame overlay not found at ${frameOverlayPath}. Ensure server/src/assets/frame-overlay.png exists.`,
+  );
+}
+const frameOverlayBuffer = fs.readFileSync(frameOverlayPath);
+
 const useCases = {
   loginUseCase: new LoginUseCase(repositories.userRepository, services.hashService, services.tokenService),
   getCurrentUserUseCase: new GetCurrentUserUseCase(repositories.userRepository),
+  uploadAndFramePhotoUseCase: new UploadAndFramePhotoUseCase(
+    services.storageService,
+    services.imageProcessingService,
+    repositories.photoRepository,
+    frameOverlayBuffer,
+    env.CLIENT_URL,
+  ),
 };
 
 const controllers = {
   authController: new AuthController(useCases.loginUseCase, useCases.getCurrentUserUseCase),
+  photoController: new PhotoController(useCases.uploadAndFramePhotoUseCase),
 };
 
 export const container = {
