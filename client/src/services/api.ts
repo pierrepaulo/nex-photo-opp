@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+import { setSessionExpiredLoginFlash } from '@/services/loginFlash';
+
 const STORAGE_TOKEN_KEY = 'photoopp-token';
 
 export const api = axios.create({
@@ -22,6 +24,7 @@ api.interceptors.response.use(
       localStorage.removeItem('photoopp-user');
       const currentPath = window.location.pathname;
       if (currentPath !== '/login') {
+        setSessionExpiredLoginFlash();
         window.location.href = '/login';
       }
     }

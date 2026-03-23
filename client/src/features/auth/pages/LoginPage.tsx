@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useAuthStore } from '@/features/auth/store/authStore';
+import { consumeLoginFlashMessage } from '@/services/loginFlash';
 import { Role } from '@/types';
 
 function EmailIcon() {
@@ -49,6 +50,7 @@ function LockIcon() {
 export function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [sessionNotice] = useState<string | null>(() => consumeLoginFlashMessage());
   const { login, isLoading, error } = useAuth();
   const { isAuthenticated, user } = useAuthStore();
   const navigate = useNavigate();
@@ -75,6 +77,15 @@ export function LoginPage() {
 
       <div className="flex flex-1 flex-col items-center justify-center w-full">
         <h1 className="mb-10 text-4xl font-bold text-dark">Login</h1>
+
+        {sessionNotice ? (
+          <p
+            className="mb-6 w-full max-w-md rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-center text-sm text-amber-900"
+            role="status"
+          >
+            {sessionNotice}
+          </p>
+        ) : null}
 
         <form onSubmit={handleSubmit} className="flex w-full flex-col gap-4">
           <Input
