@@ -1,20 +1,28 @@
 import { NextFunction, Request, Response } from 'express';
 
+import { AppError } from '@/application/errors/AppError';
+
 export function errorHandler(
-  error: Error & { statusCode?: number },
+  error: Error,
   _req: Request,
   res: Response,
   _next: NextFunction,
 ): void {
-  const statusCode = error.statusCode ?? 500;
-  if (statusCode >= 500) {
-    console.error('[ERROR]', error);
+  if (error instanceof AppError) {
+    console.debug(`[APP_ERROR] ${error.error}${error.internalCode ? ` (${error.internalCode})` : ''}: ${error.message}`);
+    res.status(error.statusCode).json({
+      error: error.error,
+      message: error.message,
+      statusCode: error.statusCode,
+    });
+    return;
   }
 
-  res.status(statusCode).json({
-    error: statusCode >= 500 ? 'INTERNAL_SERVER_ERROR' : 'REQUEST_ERROR',
-    message: statusCode >= 500 ? 'Internal server error' : error.message,
-    statusCode,
+  console.error('[ERROR]', error);
+  res.status(500).json({
+    error: 'INTERNAL_SERVER_ERROR',
+    message: 'Internal server error',
+    statusCode: 500,
   });
 }
 
