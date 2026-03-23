@@ -16,7 +16,8 @@ export function Button({
   className = '',
   ...props
 }: ButtonProps) {
-  const base = 'rounded-lg py-4 px-6 font-bold text-lg transition-colors duration-200 cursor-pointer';
+  const base =
+    'min-h-11 rounded-lg py-4 px-6 font-bold text-lg transition-colors duration-200 cursor-pointer';
   const width = fullWidth ? 'w-full' : '';
   const variants = {
     primary: 'bg-medium text-white hover:bg-dark disabled:opacity-50 disabled:cursor-not-allowed',

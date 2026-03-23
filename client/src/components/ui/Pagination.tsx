@@ -8,9 +8,10 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
   return (
     <div className="flex items-center justify-center gap-4">
       <button
+        type="button"
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage <= 1}
-        className="rounded-lg bg-medium px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-dark disabled:cursor-not-allowed disabled:opacity-50"
+        className="min-h-11 min-w-11 rounded-lg bg-medium px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-dark disabled:cursor-not-allowed disabled:opacity-50"
       >
         Anterior
       </button>
@@ -18,9 +19,10 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
         Pagina {currentPage} de {totalPages}
       </span>
       <button
+        type="button"
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage >= totalPages}
-        className="rounded-lg bg-medium px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-dark disabled:cursor-not-allowed disabled:opacity-50"
+        className="min-h-11 min-w-11 rounded-lg bg-medium px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-dark disabled:cursor-not-allowed disabled:opacity-50"
       >
         Proximo
       </button>
