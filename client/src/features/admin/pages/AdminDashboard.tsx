@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
 import { DateTimeFilters } from '@/features/admin/components/DateTimeFilters';
 import { PageSizeSelector } from '@/features/admin/components/PageSizeSelector';
+import { LogsTable } from '@/features/admin/components/LogsTable';
 import { PhotoGrid } from '@/features/admin/components/PhotoGrid';
 import { PhotoModal } from '@/features/admin/components/PhotoModal';
 import { StatsCards } from '@/features/admin/components/StatsCards';
+import { useLogs } from '@/features/admin/hooks/useLogs';
 import { usePhotos } from '@/features/admin/hooks/usePhotos';
 import { useAuthStore } from '@/features/auth/store/authStore';
 import type { AdminPhotoRow } from '@/types';
@@ -26,6 +28,19 @@ export function AdminDashboard() {
     setLimit,
     applyFilters,
   } = usePhotos();
+
+  const {
+    logs,
+    page: logsPage,
+    limit: logsLimit,
+    totalPages: logsTotalPages,
+    isLoading: logsLoading,
+    isExporting: logsExporting,
+    error: logsError,
+    setPage: setLogsPage,
+    setLimit: setLogsLimit,
+    exportCsv,
+  } = useLogs(filters);
 
   const [selected, setSelected] = useState<AdminPhotoRow | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -89,12 +104,21 @@ export function AdminDashboard() {
           onPhotoClick={handlePhotoClick}
         />
 
-        <section
-          className="rounded-xl border border-dashed border-border bg-white/80 p-6 text-center text-sm text-text-muted"
-          aria-label="Área reservada para logs"
-        >
-          Registro de atividades e exportação CSV serão exibidos aqui na Fase 7.
-        </section>
+        {logsError ? (
+          <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{logsError}</p>
+        ) : null}
+
+        <LogsTable
+          logs={logs}
+          isLoading={logsLoading}
+          isExporting={logsExporting}
+          currentPage={logsPage}
+          totalPages={logsTotalPages}
+          pageSize={logsLimit}
+          onPageChange={setLogsPage}
+          onPageSizeChange={setLogsLimit}
+          onExportCsv={exportCsv}
+        />
       </main>
 
       <PhotoModal photo={selected} isOpen={modalOpen} onClose={handleCloseModal} />
