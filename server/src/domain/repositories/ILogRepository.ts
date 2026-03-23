@@ -15,11 +15,21 @@ export interface CreateLogInput {
   requestBody?: string | null;
   responseStatus: number;
   actionType: string;
+  userAgent?: string | null;
+}
+
+/** Linha de log com email do usuario (join) para listagem admin. */
+export interface LogWithUserEmail extends Log {
+  userEmail: string | null;
 }
 
 export interface ILogRepository {
   create(data: CreateLogInput): Promise<Log>;
-  findMany(filters: LogFilters): Promise<Log[]>;
+  findMany(filters: LogFilters): Promise<LogWithUserEmail[]>;
+  findManyForExport(
+    filters: Omit<LogFilters, 'page' | 'limit'>,
+    maxRows: number,
+  ): Promise<LogWithUserEmail[]>;
   count(filters: Omit<LogFilters, 'page' | 'limit'>): Promise<number>;
 }
 

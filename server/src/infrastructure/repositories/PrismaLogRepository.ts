@@ -1,7 +1,49 @@
 import { Log } from '@/domain/entities/Log';
-import { CreateLogInput, ILogRepository, LogFilters } from '@/domain/repositories/ILogRepository';
+import {
+  CreateLogInput,
+  ILogRepository,
+  LogFilters,
+  LogWithUserEmail,
+} from '@/domain/repositories/ILogRepository';
 import { prisma } from '@/infrastructure/database/prisma/client';
 import { Prisma } from '@/generated/prisma';
+
+type LogRow = {
+  id: string;
+  userId: string | null;
+  ipAddress: string;
+  method: string;
+  route: string;
+  requestBody: string | null;
+  responseStatus: number;
+  actionType: string;
+  userAgent: string | null;
+  createdAt: Date;
+};
+
+function toLog(row: LogRow): Log {
+  return {
+    id: row.id,
+    userId: row.userId,
+    ipAddress: row.ipAddress,
+    method: row.method,
+    route: row.route,
+    requestBody: row.requestBody,
+    responseStatus: row.responseStatus,
+    actionType: row.actionType,
+    userAgent: row.userAgent,
+    createdAt: row.createdAt,
+  };
+}
+
+function toLogWithUserEmail(
+  row: LogRow & { user: { email: string } | null },
+): LogWithUserEmail {
+  return {
+    ...toLog(row),
+    userEmail: row.user?.email ?? null,
+  };
+}
 
 export class PrismaLogRepository implements ILogRepository {
   private buildWhere(filters: Omit<LogFilters, 'page' | 'limit'>): Prisma.LogWhereInput {
@@ -23,7 +65,7 @@ export class PrismaLogRepository implements ILogRepository {
   }
 
   async create(data: CreateLogInput): Promise<Log> {
-    return prisma.log.create({
+    const row = await prisma.log.create({
       data: {
         userId: data.userId ?? null,
         ipAddress: data.ipAddress,
@@ -32,22 +74,47 @@ export class PrismaLogRepository implements ILogRepository {
         requestBody: data.requestBody ?? null,
         responseStatus: data.responseStatus,
         actionType: data.actionType,
+        userAgent: data.userAgent ?? null,
       },
     });
+    return toLog(row);
   }
 
-  async findMany(filters: LogFilters): Promise<Log[]> {
+  async findMany(filters: LogFilters): Promise<LogWithUserEmail[]> {
     const page = filters.page ?? 1;
     const limit = filters.limit ?? 10;
     const skip = (page - 1) * limit;
     const where = this.buildWhere(filters);
 
-    return prisma.log.findMany({
+    const rows = await prisma.log.findMany({
       where,
       orderBy: { createdAt: 'desc' },
       skip,
       take: limit,
+      include: {
+        user: { select: { email: true } },
+      },
     });
+
+    return rows.map(toLogWithUserEmail);
+  }
+
+  async findManyForExport(
+    filters: Omit<LogFilters, 'page' | 'limit'>,
+    maxRows: number,
+  ): Promise<LogWithUserEmail[]> {
+    const where = this.buildWhere(filters);
+
+    const rows = await prisma.log.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      take: maxRows,
+      include: {
+        user: { select: { email: true } },
+      },
+    });
+
+    return rows.map(toLogWithUserEmail);
   }
 
   async count(filters: Omit<LogFilters, 'page' | 'limit'>): Promise<number> {
@@ -58,4 +125,3 @@ export class PrismaLogRepository implements ILogRepository {
     });
   }
 }
-

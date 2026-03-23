@@ -7,6 +7,7 @@ export interface Log {
   requestBody: string | null;
   responseStatus: number;
   actionType: string;
+  userAgent: string | null;
   createdAt: Date;
 }
 
