@@ -6,9 +6,11 @@ interface ModalProps {
   onClose: () => void;
   children: ReactNode;
   title?: string;
+  /** Painel interno (ex.: admin com foto + QR). */
+  panelClassName?: string;
 }
 
-export function Modal({ isOpen, onClose, children, title }: ModalProps) {
+export function Modal({ isOpen, onClose, children, title, panelClassName }: ModalProps) {
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -26,7 +28,7 @@ export function Modal({ isOpen, onClose, children, title }: ModalProps) {
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-md rounded-xl bg-white p-6 shadow-xl"
+        className={`relative w-full rounded-xl bg-white p-6 shadow-xl ${panelClassName ?? 'max-w-md'}`}
         onClick={(e) => e.stopPropagation()}
       >
         <button

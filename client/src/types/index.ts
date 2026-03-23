@@ -60,6 +60,19 @@ export interface PaginatedResponse<T> {
   totalPages: number;
 }
 
+/** Item retornado por GET /api/admin/photos. */
+export interface AdminPhotoRow {
+  id: string;
+  framedUrl: string;
+  downloadToken: string;
+  createdAt: string;
+}
+
+export interface PhotoStats {
+  totalPhotos: number;
+  filteredPhotos: number;
+}
+
 export interface ApiError {
   error: string;
   message: string;
