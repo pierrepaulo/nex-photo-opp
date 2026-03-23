@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 
 import { NexLabHeader } from '@/components/layout/NexLabHeader';
 import { Button } from '@/components/ui/Button';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import {
   fetchDownloadByToken,
   openFramedImageInNewTab,
@@ -14,13 +15,27 @@ type LoadState =
   | { status: 'error'; message: string }
   | { status: 'ready'; framedUrl: string };
 
-function InvalidTokenView() {
+function DownloadUnavailableView({ title, description }: { title: string; description: string }) {
   return (
     <div className="flex min-h-dvh flex-col bg-surface">
       <NexLabHeader />
-      <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
-        <h1 className="text-2xl font-bold text-dark">Download</h1>
-        <p className="max-w-md text-text-secondary">Link inválido.</p>
+      <div className="flex flex-1 flex-col items-center justify-center gap-8 px-6 pb-12 text-center">
+        <p
+          className="select-none text-[clamp(4rem,18vw,7rem)] font-bold leading-none text-border"
+          aria-hidden
+        >
+          404
+        </p>
+        <div className="max-w-md space-y-3">
+          <h1 className="text-2xl font-bold text-dark sm:text-3xl">{title}</h1>
+          <p className="text-base text-text-secondary">{description}</p>
+        </div>
+        <Link
+          to="/"
+          className="inline-flex min-h-11 min-w-[12rem] items-center justify-center rounded-lg bg-medium px-6 text-lg font-bold text-white transition-colors hover:bg-dark focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-medium/40"
+        >
+          Ir ao início
+        </Link>
       </div>
     </div>
   );
@@ -86,7 +101,8 @@ function DownloadPageContent({ token }: { token: string }) {
     return (
       <div className="flex min-h-dvh flex-col bg-surface">
         <NexLabHeader />
-        <div className="flex flex-1 flex-col items-center justify-center px-6">
+        <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6">
+          <LoadingSpinner size="lg" className="text-medium" />
           <p className="text-center text-lg text-text-secondary">Carregando sua foto…</p>
         </div>
       </div>
@@ -94,14 +110,12 @@ function DownloadPageContent({ token }: { token: string }) {
   }
 
   if (state.status === 'error') {
+    const isNotFound = state.message.includes('não foi encontrada') || state.message.includes('expirou');
     return (
-      <div className="flex min-h-dvh flex-col bg-surface">
-        <NexLabHeader />
-        <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
-          <h1 className="text-2xl font-bold text-dark">Download</h1>
-          <p className="max-w-md text-text-secondary">{state.message}</p>
-        </div>
-      </div>
+      <DownloadUnavailableView
+        title={isNotFound ? 'Foto indisponível' : 'Não foi possível baixar'}
+        description={state.message}
+      />
     );
   }
 
@@ -135,7 +149,12 @@ export function DownloadPage() {
   const trimmed = token?.trim() ?? '';
 
   if (!trimmed) {
-    return <InvalidTokenView />;
+    return (
+      <DownloadUnavailableView
+        title="Link inválido"
+        description="Este endereço não contém um código de download válido. Peça um novo QR Code no estande."
+      />
+    );
   }
 
   return <DownloadPageContent key={trimmed} token={trimmed} />;
