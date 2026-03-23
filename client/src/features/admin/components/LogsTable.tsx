@@ -44,7 +44,11 @@ export function LogsTable({
         </div>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="rounded-lg border border-border bg-surface px-3 py-2">
-            <PageSizeSelector value={pageSize} onChange={onPageSizeChange} />
+            <PageSizeSelector
+              value={pageSize}
+              onChange={onPageSizeChange}
+              label="Registros por página"
+            />
           </div>
           <Button
             type="button"
@@ -52,7 +56,7 @@ export function LogsTable({
             fullWidth={false}
             disabled={isExporting}
             onClick={() => onExportCsv()}
-            className="shrink-0 py-3 text-base"
+            className="min-h-11 shrink-0 px-6 py-3 text-base"
           >
             {isExporting ? 'Gerando…' : 'Download CSV'}
           </Button>

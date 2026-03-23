@@ -46,10 +46,16 @@ export function DateTimeFilters({ applied, onApply, onClear }: DateTimeFiltersPr
         />
       </label>
       <div className="flex w-full flex-col gap-2 sm:flex-row sm:w-auto">
-        <Button type="button" onClick={handleApply} fullWidth={false} className="min-w-[8rem] py-3 text-base">
+        <Button type="button" onClick={handleApply} fullWidth={false} className="min-h-11 min-w-[8rem] py-3 text-base">
           Filtrar
         </Button>
-        <Button type="button" variant="outline" onClick={handleClear} fullWidth={false} className="min-w-[8rem] py-3 text-base">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={handleClear}
+          fullWidth={false}
+          className="min-h-11 min-w-[8rem] py-3 text-base"
+        >
           Limpar
         </Button>
       </div>

@@ -68,7 +68,13 @@ export function AdminDashboard() {
             <h1 className="text-2xl font-bold text-dark sm:text-3xl">Painel administrativo</h1>
             <p className="mt-1 text-sm text-text-secondary">Fotos capturadas na ativação</p>
           </div>
-          <Button type="button" variant="outline" onClick={handleLogout} fullWidth={false} className="shrink-0 py-3 text-base">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleLogout}
+            fullWidth={false}
+            className="min-h-11 shrink-0 px-6 py-3 text-base"
+          >
             Sair
           </Button>
         </div>
@@ -77,7 +83,7 @@ export function AdminDashboard() {
       <main className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-8">
         <StatsCards stats={stats} />
 
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-stretch lg:justify-between">
           <div className="min-w-0 flex-1">
             <DateTimeFilters
               key={`${filters.startDate ?? ''}|${filters.endDate ?? ''}`}
@@ -86,7 +92,7 @@ export function AdminDashboard() {
               onClear={() => applyFilters({ startDate: null, endDate: null })}
             />
           </div>
-          <div className="shrink-0 rounded-xl border border-border bg-white px-4 py-3 shadow-sm">
+          <div className="flex shrink-0 items-center rounded-xl border border-border bg-white p-4 shadow-sm">
             <PageSizeSelector value={limit} onChange={setLimit} />
           </div>
         </div>
