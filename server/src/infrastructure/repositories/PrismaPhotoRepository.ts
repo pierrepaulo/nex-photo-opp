@@ -5,7 +5,7 @@ import {
   PhotoFilters,
 } from '@/domain/repositories/IPhotoRepository';
 import { prisma } from '@/infrastructure/database/prisma/client';
-import { Prisma } from '@/generated/prisma';
+import { Prisma } from '@prisma/client';
 
 export class PrismaPhotoRepository implements IPhotoRepository {
   private buildWhere(filters: Omit<PhotoFilters, 'page' | 'limit'>): Prisma.PhotoWhereInput {

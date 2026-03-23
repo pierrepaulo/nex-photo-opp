@@ -6,7 +6,7 @@ import {
   LogWithUserEmail,
 } from '@/domain/repositories/ILogRepository';
 import { prisma } from '@/infrastructure/database/prisma/client';
-import { Prisma } from '@/generated/prisma';
+import { Prisma } from '@prisma/client';
 
 type LogRow = {
   id: string;

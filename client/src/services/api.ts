@@ -4,8 +4,18 @@ import { setSessionExpiredLoginFlash } from '@/services/loginFlash';
 
 const STORAGE_TOKEN_KEY = 'photoopp-token';
 
+function resolveApiBaseUrl(rawValue?: string): string {
+  const trimmedValue = rawValue?.trim();
+
+  if (!trimmedValue) {
+    return '';
+  }
+
+  return trimmedValue.replace(/\/api\/?$/, '').replace(/\/$/, '');
+}
+
 export const api = axios.create({
-  baseURL: '',
+  baseURL: resolveApiBaseUrl(import.meta.env.VITE_API_URL),
 });
 
 api.interceptors.request.use((config) => {

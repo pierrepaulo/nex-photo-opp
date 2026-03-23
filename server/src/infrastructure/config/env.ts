@@ -1,10 +1,17 @@
 import { z } from 'zod';
 
+const booleanFlagSchema = z
+  .enum(['true', 'false'])
+  .optional()
+  .default('false')
+  .transform((value) => value === 'true');
+
 const envSchema = z
   .object({
     NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
     PORT: z.coerce.number().default(3333),
     CLIENT_URL: z.string().default('http://localhost:5173'),
+    ALLOW_VERCEL_PREVIEWS: booleanFlagSchema,
     /** Origens extras permitidas no CORS, separadas por vírgula (ex.: http://192.168.0.10:5173). */
     CORS_EXTRA_ORIGINS: z.string().optional().default(''),
     /** Base pública da API para URLs de /uploads (ex.: http://192.168.0.10:3333). Vazio = http://localhost:PORT. */
@@ -46,4 +53,21 @@ function parseCommaSeparatedOrigins(value: string): string[] {
 export const corsAllowedOrigins = [
   ...new Set([env.CLIENT_URL, ...parseCommaSeparatedOrigins(env.CORS_EXTRA_ORIGINS)]),
 ];
+
+function isVercelPreviewOrigin(origin: string): boolean {
+  try {
+    const { protocol, hostname } = new URL(origin);
+    return protocol === 'https:' && (hostname === 'vercel.app' || hostname.endsWith('.vercel.app'));
+  } catch {
+    return false;
+  }
+}
+
+export function isCorsOriginAllowed(origin: string): boolean {
+  if (corsAllowedOrigins.includes(origin)) {
+    return true;
+  }
+
+  return env.ALLOW_VERCEL_PREVIEWS && isVercelPreviewOrigin(origin);
+}
 

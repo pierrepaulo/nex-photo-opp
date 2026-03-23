@@ -13,7 +13,10 @@ client/dist/
 .env.*
 !.env.example
 server/.env
+server/.env.*
 client/.env
+client/.env.*
+!client/.env.example
 
 # prisma / database
 *.db

@@ -6,7 +6,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 
 import { container } from '@/container';
-import { corsAllowedOrigins, env } from '@/infrastructure/config/env';
+import { env, isCorsOriginAllowed } from '@/infrastructure/config/env';
 import { errorHandler } from '@/presentation/middleware/errorHandler';
 import { createLogMiddleware } from '@/presentation/middleware/logMiddleware';
 import { apiRoutes } from '@/presentation/routes';
@@ -21,7 +21,7 @@ app.use(
         callback(null, true);
         return;
       }
-      if (corsAllowedOrigins.includes(origin)) {
+      if (isCorsOriginAllowed(origin)) {
         callback(null, origin);
         return;
       }

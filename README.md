@@ -19,8 +19,9 @@ Aplicação web para **ativação em estande de evento**: o promotor conduz um f
 ├── AGENTS.md                 # Contexto e regras do projeto
 ├── .docs/                    # Planos de desenvolvimento
 ├── docker-compose.yml        # PostgreSQL local
-├── .env.example              # Modelo de variáveis (copiar para server/.env)
+├── .env.example              # Modelo de variáveis do backend (copiar para server/.env)
 ├── client/                   # SPA React (Vite)
+│   ├── .env.example          # Modelo de variáveis do frontend
 │   └── src/
 │       ├── components/       # UI compartilhada
 │       ├── features/         # auth, activation, admin, download
@@ -51,7 +52,7 @@ cd <pasta-do-repositorio>
 
 ### 2. Configurar variáveis de ambiente
 
-Copie o modelo e ajuste conforme necessário (na raiz do repositório):
+Backend (na raiz do repositório):
 
 ```bash
 cp .env.example server/.env
@@ -60,6 +61,14 @@ cp .env.example server/.env
 No PowerShell do Windows, equivalente: `Copy-Item .env.example server/.env`.
 
 O backend carrega o `.env` a partir do diretório de trabalho ao executar os comandos **dentro de `server/`** (por exemplo `npm run dev`).
+
+Frontend: `VITE_API_URL` é opcional no desenvolvimento local. Se você quiser apontar o app para uma API remota, copie `client/.env.example` para `client/.env.local` e ajuste a URL:
+
+```bash
+cp client/.env.example client/.env.local
+```
+
+Sem `VITE_API_URL`, o frontend continua usando o proxy do Vite para `http://localhost:3333`.
 
 ### 3. Armazenamento: local ou Firebase
 
@@ -131,13 +140,23 @@ cd client && npm run build && npm run lint
 | `JWT_SECRET` | Segredo para assinatura do JWT |
 | `JWT_EXPIRES_IN` | Expiração do token (ex.: `8h`) |
 | `PORT` | Porta da API (padrão `3333`) |
-| `CLIENT_URL` | Origem do frontend para CORS (ex.: `http://localhost:5173`) |
+| `CLIENT_URL` | Origem canônica do frontend para CORS e links de download (ex.: `http://localhost:5173`) |
+| `ALLOW_VERCEL_PREVIEWS` | Opcional: `true` para aceitar também origens `https://*.vercel.app` |
 | `STORAGE_PROVIDER` | `local` (padrão) ou `firebase` |
 | `FIREBASE_*` | Obrigatórias se `STORAGE_PROVIDER=firebase` |
 | `CORS_EXTRA_ORIGINS` | Opcional: origens extras separadas por vírgula (ex.: IP da máquina na LAN para testar no celular) |
 | `SERVER_PUBLIC_URL` | Opcional: URL pública da API para links de arquivos servidos localmente; útil quando o cliente não é `localhost` |
+| `SEED_INITIAL_*` | Obrigatórias apenas ao rodar `npx prisma db seed` em produção |
+
+`FIREBASE_STORAGE_BUCKET` pode usar tanto o formato novo `*.firebasestorage.app` quanto o legado `*.appspot.com`.
 
 Comentários em `.env.example` lembram limitações de **câmera em HTTPS** em alguns celulares ao acessar por IP local; túneis (ex.: ngrok) ou HTTPS local podem ser necessários.
+
+## Variáveis de ambiente (frontend)
+
+| Variável | Descrição |
+|----------|-----------|
+| `VITE_API_URL` | Opcional em dev local; obrigatória no Vercel. Use apenas a origem da API (ex.: `https://photo-opp-api.up.railway.app`) |
 
 ## Credenciais de teste (apenas desenvolvimento)
 
@@ -152,9 +171,34 @@ Criadas pelo seed do Prisma (`server/prisma/seed.ts`):
 
 ## Deploy
 
-- **Frontend (Vercel):** configure o build a partir de `client/` e variáveis públicas se existirem.
-- **Backend (Railway):** configure `DATABASE_URL`, segredos JWT, `CLIENT_URL` da origem do frontend e, se aplicável, Firebase.
-- **Links públicos:** adicione aqui as URLs reais quando o deploy estiver disponível (ex.: `https://...`).
+### Frontend (Vercel)
+
+1. Importe o repositório no Vercel.
+2. Configure o **Root Directory** como `client`.
+3. Defina `VITE_API_URL` com a origem pública do backend no Railway.
+4. Mantenha o deploy automático por push ativado.
+
+### Backend (Railway)
+
+1. Crie um projeto no Railway com um serviço PostgreSQL e um serviço para o backend apontando para `server`.
+2. Configure as variáveis `DATABASE_URL`, `JWT_SECRET`, `JWT_EXPIRES_IN`, `CLIENT_URL`, `ALLOW_VERCEL_PREVIEWS`, `STORAGE_PROVIDER`, `FIREBASE_*` e, se for rodar o seed inicial, `SEED_INITIAL_*`.
+3. Use `npm run build` como **Build Command**.
+4. Use `npx prisma migrate deploy` como **Pre-Deploy Command**.
+5. Use `npm start` como **Start Command**.
+6. Configure o healthcheck em `/api/health`.
+7. Rode `npx prisma db seed` manualmente apenas na configuração inicial do ambiente de produção.
+
+### Firebase Storage
+
+1. Crie o projeto no Firebase Console e ative o Storage.
+2. Configure o bucket com leitura pública para os arquivos entregues pelo QR Code.
+3. Gere uma Service Account e copie `project_id`, `client_email`, `private_key` e o nome do bucket para as variáveis `FIREBASE_*`.
+4. Defina `STORAGE_PROVIDER=firebase` no backend de produção.
+
+### Links públicos
+
+- Frontend (Vercel): `https://<seu-frontend>.vercel.app`
+- Backend (Railway): `https://<seu-backend>.up.railway.app`
 
 ## Decisões técnicas relevantes
 
