@@ -21,7 +21,9 @@ export function ActivationPage() {
   const [uploadError, setUploadError] = useState<string | null>(null);
 
   const cameraActive = step === 'camera' || step === 'countdown';
-  const { videoRef, isLoading, error, captureFrame } = useCamera({ active: cameraActive });
+  const { videoRef, isLoading, error, captureFrame, retry: retryCamera } = useCamera({
+    active: cameraActive,
+  });
 
   const captureFrameRef = useRef(captureFrame);
   const resetCountdownRef = useRef<() => void>(() => {});
@@ -111,15 +113,23 @@ export function ActivationPage() {
 
   return (
     <>
-      {step === 'home' ? <HomeScreen onStart={goToCamera} /> : null}
+      {step === 'home' ? (
+        <div key="home" className="animate-activation-step-in">
+          <HomeScreen onStart={goToCamera} />
+        </div>
+      ) : null}
 
       {step === 'camera' || step === 'countdown' ? (
-        <div className="relative mx-auto min-h-dvh w-full max-w-[480px]">
+        <div
+          key="camera"
+          className="relative mx-auto min-h-dvh w-full max-w-[min(100%,480px)] animate-activation-step-in"
+        >
           <CameraScreen
             videoRef={videoRef}
             isLoading={isLoading}
             error={error}
             onShutter={startCountdown}
+            onRetryCamera={retryCamera}
             shutterDisabled={step === 'countdown'}
           />
           {step === 'countdown' && currentValue !== null && currentValue > 0 ? (
@@ -129,7 +139,7 @@ export function ActivationPage() {
       ) : null}
 
       {step === 'review' && previewDataUrl ? (
-        <div className="mx-auto w-full max-w-[480px]">
+        <div key="review" className="mx-auto w-full max-w-[min(100%,480px)] animate-activation-step-in">
           <ReviewScreen
             previewDataUrl={previewDataUrl}
             isUploading={isUploading}
@@ -141,7 +151,9 @@ export function ActivationPage() {
       ) : null}
 
       {step === 'qrcode' && uploadResult ? (
-        <QRCodeScreen downloadUrl={uploadResult.downloadUrl} onFinish={finish} />
+        <div key="qrcode" className="animate-activation-step-in">
+          <QRCodeScreen downloadUrl={uploadResult.downloadUrl} onFinish={finish} />
+        </div>
       ) : null}
     </>
   );

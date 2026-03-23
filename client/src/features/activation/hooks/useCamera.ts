@@ -4,11 +4,35 @@ interface UseCameraOptions {
   active: boolean;
 }
 
+function cameraErrorMessage(err: unknown): string {
+  const name =
+    err && typeof err === 'object' && 'name' in err ? String((err as DOMException).name) : '';
+  if (name === 'NotAllowedError' || name === 'PermissionDeniedError') {
+    return 'Acesso à câmera negado. Permita o uso da câmera nas configurações do navegador e toque em Tentar novamente.';
+  }
+  if (name === 'NotFoundError' || name === 'DevicesNotFoundError') {
+    return 'Nenhuma câmera foi encontrada neste dispositivo.';
+  }
+  if (name === 'NotReadableError' || name === 'TrackStartError') {
+    return 'A câmera está em uso por outro aplicativo. Feche-o e tente novamente.';
+  }
+  if (name === 'OverconstrainedError' || name === 'ConstraintNotSatisfiedError') {
+    return 'Este dispositivo não atende às configurações da câmera solicitadas. Tente novamente.';
+  }
+  return 'Não foi possível acessar a câmera. Verifique as permissões e tente de novo.';
+}
+
 export function useCamera({ active }: UseCameraOptions) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [retryToken, setRetryToken] = useState(0);
+
+  const retry = useCallback(() => {
+    setError(null);
+    setRetryToken((n) => n + 1);
+  }, []);
 
   useEffect(() => {
     if (!active) {
@@ -53,9 +77,9 @@ export function useCamera({ active }: UseCameraOptions) {
         }
         setIsLoading(false);
       })
-      .catch(() => {
+      .catch((err: unknown) => {
         if (!cancelled) {
-          setError('Não foi possível acessar a câmera. Verifique as permissões.');
+          setError(cameraErrorMessage(err));
           setIsLoading(false);
         }
       });
@@ -68,7 +92,7 @@ export function useCamera({ active }: UseCameraOptions) {
         videoEl.srcObject = null;
       }
     };
-  }, [active]);
+  }, [active, retryToken]);
 
   const captureFrame = useCallback((): Promise<Blob | null> => {
     const video = videoRef.current;
@@ -88,5 +112,5 @@ export function useCamera({ active }: UseCameraOptions) {
     });
   }, []);
 
-  return { videoRef, isLoading, error, captureFrame };
+  return { videoRef, isLoading, error, captureFrame, retry };
 }

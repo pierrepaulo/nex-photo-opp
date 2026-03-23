@@ -29,3 +29,40 @@ body {
 #root {
   min-height: 100dvh;
 }
+
+@keyframes activation-step-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes countdown-pop {
+  0% {
+    transform: scale(1.18);
+    opacity: 0.88;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-activation-step-in,
+  .animate-countdown-pop {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.animate-activation-step-in {
+  animation: activation-step-in 280ms ease-out forwards;
+}
+
+.animate-countdown-pop {
+  animation: countdown-pop 0.75s cubic-bezier(0.34, 1.35, 0.64, 1) forwards;
+}

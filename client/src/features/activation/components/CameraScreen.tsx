@@ -1,4 +1,5 @@
 import type { RefObject } from 'react';
+import { Button } from '@/components/ui/Button';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 
 interface CameraScreenProps {
@@ -6,6 +7,7 @@ interface CameraScreenProps {
   isLoading: boolean;
   error: string | null;
   onShutter: () => void;
+  onRetryCamera?: () => void;
   shutterDisabled?: boolean;
 }
 
@@ -14,12 +16,21 @@ export function CameraScreen({
   isLoading,
   error,
   onShutter,
+  onRetryCamera,
   shutterDisabled = false,
 }: CameraScreenProps) {
   if (error) {
     return (
-      <div className="flex min-h-dvh w-full flex-col items-center justify-center bg-white px-6">
-        <p className="text-center text-text-secondary">{error}</p>
+      <div className="flex min-h-dvh w-full flex-col items-center justify-center gap-6 bg-white px-6 pb-10">
+        <div className="max-w-md text-center">
+          <p className="text-lg font-semibold text-dark">Não foi possível usar a câmera</p>
+          <p className="mt-3 text-text-secondary">{error}</p>
+        </div>
+        {onRetryCamera ? (
+          <Button type="button" onClick={onRetryCamera} fullWidth={false} className="min-h-11 min-w-[12rem]">
+            Tentar novamente
+          </Button>
+        ) : null}
       </div>
     );
   }
@@ -45,7 +56,7 @@ export function CameraScreen({
           type="button"
           onClick={onShutter}
           disabled={isLoading || shutterDisabled}
-          className="h-20 w-20 rounded-full border-4 border-medium bg-surface shadow-md transition-transform hover:scale-105 disabled:opacity-40"
+          className="h-20 w-20 rounded-full border-4 border-medium bg-surface shadow-md transition-transform hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-medium/40 disabled:opacity-40"
           aria-label="Iniciar contagem para captura"
         />
       </div>
